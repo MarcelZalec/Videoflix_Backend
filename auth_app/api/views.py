@@ -44,6 +44,7 @@ class RegistrationView(APIView):
                 'username': saved_account.username,
                 'email': saved_account.email
             }
+            saved_account.is_active = True
         else:
             data = serializer.errors
             return Response({'error': 'Etwas ist schiefgelaufen'}, status=status.HTTP_400_BAD_REQUEST)

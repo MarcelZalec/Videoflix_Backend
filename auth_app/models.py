@@ -3,16 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 class CustomUserModel(AbstractUser):
-    groups = models.ManyToManyField(
-        'auth.Group',
-        related_name='custom_user_groups',  # Vermeidet den Konflikt
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        related_name='custom_user_permissions',  # Vermeidet den Konflikt
-        blank=True
-    )
     username = models.CharField(max_length=100, default=None, null=True, blank=True)
     email = models.EmailField(max_length=100, unique=True)
     remember = models.BooleanField(default=True)

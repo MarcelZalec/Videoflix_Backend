@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
 ]
 
+AUTH_USER_MODEL = 'auth_app.CustomUserModel'
+
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -122,6 +124,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+DOMAIN_NAME = os.getenv('DOMAIN_NAME')
 
 
 # Password validation
