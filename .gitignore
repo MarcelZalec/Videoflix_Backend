@@ -2,6 +2,6 @@
 db.sqlite3
 /media
 **/__pycache__/**
-**/migtations/**
-!**/migtations
-!**/migtations/__init__py
+**/migrations/**
+!**/migrations
+!**/migrations/__init__py
