@@ -2,6 +2,8 @@
 db.sqlite3
 /media
 **/__pycache__/**
+!**/__pycache__
+!**/__pycache__/__init__.cpython-312.pyc
 **/migrations/**
 !**/migrations
-!**/migrations/__init__py
+!**/migrations/__init__.py
