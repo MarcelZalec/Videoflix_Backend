@@ -1,17 +1,22 @@
+from django.contrib.auth import get_user_model, tokens
+from django.contrib.auth.tokens import PasswordResetTokenGenerator as token_generator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from .serializers import *
+from auth_app.models import PasswordReset
+
+User = get_user_model()
 
 
-class LoginView(ObtainAuthToken):
+class LoginView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        serializer = self.serializer_class(data = request.data)
+        serializer = LoginSerializer(data = request.data)
         data = {}
         
         if serializer.is_valid():
@@ -19,13 +24,12 @@ class LoginView(ObtainAuthToken):
             token, created = Token.objects.get_or_create(user=user)
             data = {
                 'token': token.key,
-                'username': user.username,
+                'remember': user.remember,
                 'email': user.email
             }
+            return Response(data, status=status.HTTP_200_OK)
         else:
-            data = serializer.errors
-        
-        return Response(data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RegistrationView(APIView):
@@ -38,15 +42,26 @@ class RegistrationView(APIView):
         if serializer.is_valid():
             saved_account = serializer.save()
             token, created = Token.objects.get_or_create(user = saved_account)
-            print(f"Das ist der accsess Token {token}")
             data = {
                 'token': token.key,
                 'username': saved_account.username,
                 'email': saved_account.email
             }
-            saved_account.is_active = True
+            return Response(data, status=status.HTTP_201_CREATED)
         else:
-            data = serializer.errors
-            return Response({'error': 'Etwas ist schiefgelaufen'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+    TokenAuthentication = [AllowAny]
+    serializer_class = ResetPasswordSerializer
+    
+    def post(self, request):
+        email = request.data['email']
+        user = User.objects.filter(email_iexact=email).first()
         
-        return Response(data, status=status.HTTP_201_CREATED)
+        if user:
+            token = token_generator.make_token(user)
+            reset = PasswordReset(email=email, token=token)
+            reset.save()

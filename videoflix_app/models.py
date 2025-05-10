@@ -14,8 +14,17 @@ def video_file_path(instance, filename):
     return f'{folder_path}/{filename}' 
 
 class Video(models.Model):
+    CATEGORY_CHOICES = [
+        ('horror', 'Horror'),
+        ('action', 'Action'),
+        ('drama', 'Drama'),
+        ('animals', 'Animals'),
+        ('documentary', 'Documentary'),
+        ('eroticism', 'Eroticism'),
+    ]
     title = models.CharField(max_length=80)
     description = models.CharField(max_length=500)
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='new')
     created_at = models.DateTimeField(default=datetime.now)
     video_file = models.FileField(upload_to='videos', blank=True, null=True)
     thumbnail = models.ImageField(upload_to=video_file_path, blank=True, null=True)

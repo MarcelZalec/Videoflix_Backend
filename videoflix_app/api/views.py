@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.views.decorators.cache import cache_page
+from django.core.cache import cache
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,14 +13,19 @@ from rest_framework.permissions import AllowAny
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-# @cache_page(CACHE_TTL)
+
 class VideoView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request, format=None):
-        video = Video.objects.all()
-        serializer = VideoSerializer(video, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        cached_videos = cache.get('all_videos')
+        if cached_videos is None:
+            videos = Video.objects.all()
+            cached_videos = list(videos.values())
+            cache.set('all_videos', cached_videos, timeout= CACHE_TTL)
+        return JsonResponse(cached_videos, safe=False)
+        # serializer = VideoSerializer(videos, many=True)
+        # return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = VideoSerializer(data = request.data)

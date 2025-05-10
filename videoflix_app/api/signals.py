@@ -12,16 +12,18 @@ from django.contrib.auth.tokens import default_token_generator as tg
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.urls import reverse
+import django_rq
 
 
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
     print("Video wurde geschpeichert")
     if created:
-        convert_240p(instance.video_file.path)
-        convert_480p(instance.video_file.path)
-        convert_720p(instance.video_file.path)
-        convert_1080p(instance.video_file.path)
+        queue = django_rq.get_queue('default', autocommit=True)
+        queue.enqueue(convert_240p, instance.video_file.path)
+        queue.enqueue(convert_480p, instance.video_file.path)
+        queue.enqueue(convert_720p, instance.video_file.path)
+        queue.enqueue(convert_1080p, instance.video_file.path)
 
 
 @receiver(post_delete, sender=Video)

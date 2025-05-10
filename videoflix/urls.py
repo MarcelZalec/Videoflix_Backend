@@ -23,7 +23,8 @@ from debug_toolbar.toolbar import debug_toolbar_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('videoflix_app.api.urls')),
-    path('auth/', include('auth_app.api.urls')) 
+    path('auth/', include('auth_app.api.urls')),
+    path('django-rq/', include('django_rq.urls')),
 ]
 
 urlpatterns += debug_toolbar_urls()

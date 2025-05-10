@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'videoflix_app.apps.VideoflixAppConfig',
     'auth_app',
     'debug_toolbar',
+    "django_rq",
 ]
 
 AUTH_USER_MODEL = 'auth_app.CustomUserModel'
@@ -77,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 INTERNAL_IPS = [
@@ -100,9 +102,22 @@ TEMPLATES = [
     },
 ]
 
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': 'foobared',
+        'DEFAULT_TIMEOUT': 360,
+        ## 'REDIS_CLIENT_KWARGS': {    # Eventual additional Redis connection arguments
+        ##     'ssl_cert_reqs': None,
+        ## },
+    },
+}
+
 CACHES = {
         "default": {
-            "BACKEND": "django.core.cache.backends.db.DatabaseCache",  #    .cache.RedisCache
+            "BACKEND": "django_redis.cache.RedisCache",  # django_redis.cache.RedisCache   ## redis_cache
             "LOCATION": "redis://127.0.0.1:6379/1",
             "OPTIONS": {
                 "PASSWORD": 'foobared',
