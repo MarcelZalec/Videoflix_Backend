@@ -1,5 +1,11 @@
+from datetime import timedelta
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 from django.contrib.auth import get_user_model, tokens
-from django.contrib.auth.tokens import PasswordResetTokenGenerator as token_generator
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils import timezone, http
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -8,6 +14,9 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from .serializers import *
 from auth_app.models import PasswordReset
+import os
+
+from django.core.mail import send_mail
 
 User = get_user_model()
 
@@ -52,16 +61,77 @@ class RegistrationView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ResetPasswordView(APIView):
+class RequestPassowrdResetView(APIView):
     permission_classes = [AllowAny]
     TokenAuthentication = [AllowAny]
     serializer_class = ResetPasswordSerializer
     
     def post(self, request):
         email = request.data['email']
-        user = User.objects.filter(email_iexact=email).first()
-        
+        user = User.objects.filter(email__iexact=email).first()
         if user:
+            token_generator = PasswordResetTokenGenerator()
             token = token_generator.make_token(user)
             reset = PasswordReset(email=email, token=token)
             reset.save()
+            
+            reset_url = reverse('reset_password_token', kwargs={'token': token})
+            ## relative_reset_url = reset_url.replace('/videoflix', '')
+            ## custom_port_url = os.getenv('REDIRECT_LANDING') + relative_reset_url
+            full_url = reset_url
+            domain_url = "http://localhost:5500/" #os.getenv('REDIRECT_LANDING')
+            subject = "Reset your password"
+            text_content = render_to_string('emails/forgot_password.txt', {
+                'username': user.username, 
+                'full_url': full_url,
+                'domain_url': domain_url,
+            })
+            html_content = render_to_string('emails/forgot_password.html', {
+                'username': user.username, 
+                'full_url': full_url,
+                'domain_url': domain_url,
+            })
+            email = EmailMultiAlternatives(
+                subject,
+                text_content,
+                settings.DEFAULT_FROM_EMAIL,
+                ['marci.zalec@hotmail.com'],
+            )
+            email.attach_alternative(html_content, "text/html")
+            email.send(fail_silently=False)
+            return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ResetPasswordView(APIView):
+    permission_classes = []
+    
+    def get(self, request, token):
+        obj = PasswordReset.objects.filter(token=token).first()
+        if not obj:
+            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        token_lifetime = timedelta(hours=24)
+        if timezone.now() > obj.created_at + token_lifetime:
+            return Response({'error': 'Token expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'success': 'Token is valid'}, status=status.HTTP_200_OK)
+    
+    def post(self, request, token):
+        obj = PasswordReset.objects.filter(token=token).first()
+        if not obj:
+            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        token_lifetime = timedelta(hours=24)
+        if timezone.now() > obj.created_at + token_lifetime:
+            return Response({'error': 'Token expired'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = User.objects.filter(email=obj.email).first()
+        if user:
+            user.set_password(request.data['password'])
+            user.save()
+            obj.delete()
+            return Response({'success': 'Password updated'})
+        else:
+            return Response({'error': 'No user found'}, status=404)

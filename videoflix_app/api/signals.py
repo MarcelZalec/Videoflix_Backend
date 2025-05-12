@@ -17,13 +17,16 @@ import django_rq
 
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
-    print("Video wurde geschpeichert")
+    print(f"Video wurde geschpeichert {instance.video_file.path}")
     if created:
-        queue = django_rq.get_queue('default', autocommit=True)
-        queue.enqueue(convert_240p, instance.video_file.path)
-        queue.enqueue(convert_480p, instance.video_file.path)
-        queue.enqueue(convert_720p, instance.video_file.path)
-        queue.enqueue(convert_1080p, instance.video_file.path)
+        file_path = instance.video_file.path
+        convert_720p(file_path)
+        convert_1080p(file_path)
+        ## queue = django_rq.get_queue('default', autocommit=True)
+        ## queue.enqueue(convert_240p, file_path)
+        ## queue.enqueue(convert_480p, file_path)
+        ## queue.enqueue(convert_720p, file_path)
+        ## queue.enqueue(convert_1080p, file_path)
 
 
 @receiver(post_delete, sender=Video)
