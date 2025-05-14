@@ -149,6 +149,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 DOMAIN_NAME = os.getenv('DOMAIN_NAME')
+FRONT_END = os.getenv('FRONT_END')
 
 
 # Password validation

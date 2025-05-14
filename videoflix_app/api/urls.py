@@ -10,5 +10,5 @@ urlpatterns = [
     path('resetPass/<token>', RequestPassowrdResetView.as_view(), name='reset_password_token'),
     path('videos/', VideoView.as_view(), name='videos'),
     path('video/<int:video_id>/', SingleVideoView.as_view(), name='video-detail'),
-    # path('activate/<uidb64>/<token>/', activate_user, name='activate_user'),
+    path('activate/<uidb64>/<token>/', activate_user, name='activate_user'),
 ]
