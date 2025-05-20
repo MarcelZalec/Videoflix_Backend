@@ -3,7 +3,7 @@ from auth_app.models import CustomUserModel
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete, pre_save
 
-from django.conf import settings
+from videoflix import settings
 from django.core.mail import EmailMultiAlternatives
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator as PRTG

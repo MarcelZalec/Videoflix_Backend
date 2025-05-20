@@ -19,6 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+THUMBNAIL_FOLDER = os.path.join(MEDIA_ROOT, 'thumbnails')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -29,8 +31,6 @@ SECRET_KEY = 'django-insecure-p_!skmgm6ri0fo75*yjcnxvy5rj&c5aw6i$0hcuiu*126+rp7&
 DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
-
-CACHE_TTL = 60 * 15
 
 CSRF_TRUSTED_ORIGINS = [
   'http://127.0.0.1:5500',
@@ -87,6 +87,20 @@ INTERNAL_IPS = [
 
 ROOT_URLCONF = 'videoflix.urls'
 
+CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",  # django_redis.cache.RedisCache   ## redis_cache
+            "LOCATION": "redis://127.0.0.1:6379/1",
+            "OPTIONS": {
+                "PASSWORD": 'foobared',
+                "CLIENT_CLASS": "django_redis.client.DefaultClient"
+            },
+        "KEY_PREFIX": "videoflix"
+    }
+}
+
+CACHE_TTL = 60 * 15
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -113,18 +127,6 @@ RQ_QUEUES = {
         ##     'ssl_cert_reqs': None,
         ## },
     },
-}
-
-CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",  # django_redis.cache.RedisCache   ## redis_cache
-            "LOCATION": "redis://127.0.0.1:6379/1",
-            "OPTIONS": {
-                "PASSWORD": 'foobared',
-                "CLIENT_CLASS": "django_redis.client.DefaultClient"
-            },
-        "KEY_PREFIX": "videoflix"
-    }
 }
 
 WSGI_APPLICATION = 'videoflix.wsgi.application'

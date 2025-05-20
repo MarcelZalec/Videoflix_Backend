@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.core.mail import EmailMultiAlternatives
-from django.conf import settings
+from videoflix import settings
 from django.contrib.auth import get_user_model, tokens
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.template.loader import render_to_string
