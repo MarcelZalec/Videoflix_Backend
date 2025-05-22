@@ -11,6 +11,7 @@ from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.urls import reverse
 import django_rq
+from django.core.mail import get_connection
 
 from rest_framework.response import Response
 
@@ -34,6 +35,8 @@ def user_post_create(sender, instance, created, **kwargs):
             context={'user': instance, 'activation_url': full_url, 'domain_url': domain_url},
         )
         subject = 'Confirm your email'
+        connection = get_connection()
+        connection.open()
         msg = EmailMultiAlternatives(
             subject,
             text_content,
@@ -41,4 +44,7 @@ def user_post_create(sender, instance, created, **kwargs):
             [instance.email],
         )
         msg.attach_alternative(html_content, "text/html")
+        print(msg.message())
         msg.send(fail_silently=True)
+        
+        connection.close()

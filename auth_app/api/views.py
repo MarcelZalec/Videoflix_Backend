@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection, send_mail
 from videoflix import settings
 from django.contrib.auth import get_user_model, tokens
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -91,14 +91,27 @@ class RequestPassowrdResetView(APIView):
                 'full_url': full_url,
                 'domain_url': domain_url,
             })
-            email = EmailMultiAlternatives(
-                subject,
-                text_content,
+            connection = get_connection()
+            connection.open()
+            send_mail(
+                'Test Email',
+                'Falls du diese E-Mail siehst, funktioniert dein SMTP-Backend!',
                 settings.DEFAULT_FROM_EMAIL,
                 ['marci.zalec@hotmail.com'],
+                fail_silently=False,
+                connection=connection
             )
-            email.attach_alternative(html_content, "text/html")
-            email.send(fail_silently=False)
+            
+            #####  email = EmailMultiAlternatives(
+            #####      subject,
+            #####      text_content,
+            #####      settings.DEFAULT_FROM_EMAIL,
+            #####      ['marci.zalec@hotmail.com'],
+            #####  )
+            #####  email.attach_alternative(html_content, "text/html")
+            #####  print(email.message())
+            #####  email.send(fail_silently=False)
+            connection.close()
             return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)

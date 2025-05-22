@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
     if created:
-        queue = get_queue('default', autocommit=True)       
+        queue = get_queue('default', autocommit=True)
         try:
             job = queue.enqueue(process_video, instance)
             logger.debug(f"Job successfully enqueued: {job.id}")
