@@ -1,5 +1,5 @@
 from django.urls import path, include
-from auth_app.api.views import RegistrationView, LoginView, RequestPassowrdResetView
+from auth_app.api.views import RegistrationView, LoginView, RequestPassowrdResetView, VerifyTokenView
 from videoflix_app.api.views import VideoView, SingleVideoView
 from videoflix_app.functions import activate_user
 
@@ -11,4 +11,5 @@ urlpatterns = [
     path('videos/', VideoView.as_view(), name='videos'),
     path('video/<int:video_id>/', SingleVideoView.as_view(), name='video-detail'),
     path('activate/<uidb64>/<token>/', activate_user, name='activate_user'),
+    path('authorization/', VerifyTokenView.as_view(), name='authorization'),
 ]

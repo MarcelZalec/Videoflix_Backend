@@ -122,7 +122,7 @@ RQ_QUEUES = {
         'PORT': 6379,
         'DB': 0,
         'PASSWORD': 'foobared',
-        'DEFAULT_TIMEOUT': 360,
+        'DEFAULT_TIMEOUT': 36000,
         ## 'REDIS_CLIENT_KWARGS': {    # Eventual additional Redis connection arguments
         ##     'ssl_cert_reqs': None,
         ## },

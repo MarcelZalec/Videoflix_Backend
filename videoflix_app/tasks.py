@@ -122,7 +122,7 @@ def convert_video_to_hls(v_path):
             print(f"Error: Failed to convert video to {res}")
 
 
-@job('default')
+## @job('default')
 def process_video(inst):
     """
     Job to convert a Video instance's video_file to HLS (HTTP Live Streaming)
@@ -141,9 +141,10 @@ def process_video(inst):
         return
     convert_video_to_hls(inst.video_file.path)
     
-    if not inst.thumbnail:
-        thumbnail_path = get_thumbnail(inst.video_file.path)
+    ## if not inst.thumbnail:
+    ##     thumbnail_path = get_thumbnail(inst.video_file.path)
+    ##     print(f"Das ist der path des Bildes {thumbnail_path}")
     
     if inst.video_file:
-        inst.thumbnail = thumbnail_path.replace(settings.MEDIA_ROOT, '')
+        # inst.thumbnail = thumbnail_path.replace(settings.MEDIA_ROOT, '')
         inst.save()

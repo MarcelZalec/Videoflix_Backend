@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 from videoflix_app.tasks import *
 from django_rq import job, get_queue
+from django.db import transaction
 
 import logging
 
@@ -14,12 +15,13 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
     if created:
-        queue = get_queue('default', autocommit=True)
-        try:
-            job = queue.enqueue(process_video, instance)
-            logger.debug(f"Job successfully enqueued: {job.id}")
-        except Exception as e:
-                logger.error(f"Error enqueuing job: {str(e)}")
+        transaction.on_commit(lambda: process_video(instance))
+        ## queue = get_queue('default', autocommit=True)
+        ## try:
+        ##     job = queue.enqueue(process_video, instance)
+        ##     logger.debug(f"Job successfully enqueued: {job.id}")
+        ## except Exception as e:
+        ##         logger.error(f"Error enqueuing job: {str(e)}")
 
 
 @receiver(post_delete, sender=Video)

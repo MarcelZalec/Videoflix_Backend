@@ -15,7 +15,7 @@ from rest_framework.permissions import AllowAny
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-
+# @cache_page(CACHE_TTL)
 class VideoView(APIView):
     permission_classes = [AllowAny]
     

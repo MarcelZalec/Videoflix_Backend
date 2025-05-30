@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone, http
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
@@ -148,3 +148,20 @@ class ResetPasswordView(APIView):
             return Response({'success': 'Password updated'})
         else:
             return Response({'error': 'No user found'}, status=404)
+
+
+class VerifyTokenView(APIView):
+    authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        sended_Token = request.data.get('token')
+        user_token  = request.auth
+        
+        print(request)
+        print(f"Das ist der gesendete {sended_Token} und das der user {user_token} Token")
+        
+        if sended_Token == str(user_token):
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
