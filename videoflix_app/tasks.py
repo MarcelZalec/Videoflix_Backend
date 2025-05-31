@@ -2,6 +2,7 @@ import subprocess
 import os
 from django_rq import job
 from videoflix import settings
+from celery import shared_task
 
 ffmpeg_path = r'/usr/bin/ffmpeg'
 RESOLUTIONS = {
@@ -123,6 +124,7 @@ def convert_video_to_hls(v_path):
 
 
 ## @job('default')
+@shared_task
 def process_video(inst):
     """
     Job to convert a Video instance's video_file to HLS (HTTP Live Streaming)

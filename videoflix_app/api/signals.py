@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
     if created:
-        transaction.on_commit(lambda: process_video(instance))
+        transaction.on_commit(lambda: process_video.delay_on_commit(instance))
         ## queue = get_queue('default', autocommit=True)
         ## try:
         ##     job = queue.enqueue(process_video, instance)
