@@ -1,6 +1,5 @@
 import subprocess
 import os
-from django_rq import job
 from videoflix import settings
 from celery import shared_task
 
@@ -123,7 +122,6 @@ def convert_video_to_hls(v_path):
             print(f"Error: Failed to convert video to {res}")
 
 
-## @job('default')
 @shared_task
 def process_video(inst):
     """

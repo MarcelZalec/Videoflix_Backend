@@ -1,7 +1,6 @@
-import os
 from auth_app.models import CustomUserModel
 from django.dispatch import receiver
-from django.db.models.signals import post_save, post_delete, pre_save
+from django.db.models.signals import post_save
 
 from videoflix import settings
 from django.core.mail import EmailMultiAlternatives
@@ -10,10 +9,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator as PRTG
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.urls import reverse
-import django_rq
 from django.core.mail import get_connection
-
-from rest_framework.response import Response
 
 
 @receiver(post_save, sender=CustomUserModel)
