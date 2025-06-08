@@ -20,8 +20,10 @@ pillow==11.2.1
 prompt_toolkit==3.0.51
 PyJWT==2.9.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.1.0
 redis==5.3.0
 rq==2.3.2
+# rq-win @ git+https://github.com/michaelbrooks/rq-win.git@c6e65e38f8a6ca99a0c8e0dd6fe35f9b92837cca
 six==1.17.0
 sqlparse==0.5.3
 times==0.7

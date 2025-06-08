@@ -20,8 +20,10 @@ def user_post_create(sender, instance, created, **kwargs):
         token = tg.make_token(instance)
         uid = urlsafe_base64_encode(force_bytes(instance.pk))
         activation_url = reverse('activate_user', kwargs={'uidb64': uid, 'token': token})
-        full_url = f'{settings.FRONT_END}{activation_url}'
-        domain_url = "http://localhost:5500/" #os.getenv('REDIRECT_LANDING')
+        relative_activation_url = activation_url.replace('/api', 'api')
+        full_url = f'http://127.0.0.1:8000/{relative_activation_url}'
+        domain_url = settings.REDIRECT_LANDING
+        print(full_url)
         text_content = render_to_string(
             "emails/activation_email.txt",
             context={'user': instance, 'activation_url': full_url, 'domain_url': domain_url},
@@ -37,10 +39,10 @@ def user_post_create(sender, instance, created, **kwargs):
             subject,
             text_content,
             settings.DEFAULT_FROM_EMAIL,
-            [instance.email],
+            ['marci.zalec@hotmail.com'],
         )
         msg.attach_alternative(html_content, "text/html")
-        print(msg.message())
+        ## print(msg.message())
         msg.send(fail_silently=True)
         
         connection.close()

@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+import json
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,24 +29,16 @@ THUMBNAIL_FOLDER = os.path.join(MEDIA_ROOT, 'thumbnails')
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p_!skmgm6ri0fo75*yjcnxvy5rj&c5aw6i$0hcuiu*126+rp7&'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = json.loads(os.getenv('ALLOWED_HOSTS', '[]'))
 
-CSRF_TRUSTED_ORIGINS = [
-  'http://127.0.0.1:5500',
-  'http://localhost:5500',
-  'https://test.marcelzalec.at',
-]
+CSRF_TRUSTED_ORIGINS = json.loads(os.getenv('CSRF_TRUSTED_ORIGINS', '[]'))
 
-CORS_ALLOWED_ORIGINS = [
-  'http://127.0.0.1:5500',
-  'http://localhost:5500',
-  'https://test.marcelzalec.at',
-]
+CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
 
 CORS_ALLOW_HEADERS = [
     'authorization',
@@ -153,7 +149,8 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 DOMAIN_NAME = os.getenv('DOMAIN_NAME')
-FRONT_END = os.getenv('FRONT_END')
+FRONT_END = os.getenv('REDIRECT_LOGIN')
+REDIRECT_LANDING = os.getenv('REDIRECT_LANDING')
 
 
 # Password validation

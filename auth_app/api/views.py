@@ -76,10 +76,10 @@ class RequestPassowrdResetView(APIView):
             reset.save()
             
             reset_url = reverse('reset_password_token', kwargs={'token': token})
-            ## relative_reset_url = reset_url.replace('/videoflix', '')
-            ## custom_port_url = os.getenv('REDIRECT_LANDING') + relative_reset_url
-            full_url = reset_url
-            domain_url = "http://localhost:5500/" #os.getenv('REDIRECT_LANDING')
+            relative_reset_url = reset_url.replace('/api', 'api')
+            custom_port_url = f'{settings.REDIRECT_LANDING}{relative_reset_url}'
+            full_url = custom_port_url
+            domain_url = os.getenv('REDIRECT_RESTET_PASS')
             subject = "Reset your password"
             text_content = render_to_string('emails/forgot_password.txt', {
                 'username': user.username, 
@@ -91,27 +91,16 @@ class RequestPassowrdResetView(APIView):
                 'full_url': full_url,
                 'domain_url': domain_url,
             })
-            connection = get_connection()
-            connection.open()
-            send_mail(
-                'Test Email',
-                'Falls du diese E-Mail siehst, funktioniert dein SMTP-Backend!',
+            
+            email = EmailMultiAlternatives(
+                subject,
+                text_content,
                 settings.DEFAULT_FROM_EMAIL,
                 ['marci.zalec@hotmail.com'],
-                fail_silently=False,
-                connection=connection
             )
-            
-            #####  email = EmailMultiAlternatives(
-            #####      subject,
-            #####      text_content,
-            #####      settings.DEFAULT_FROM_EMAIL,
-            #####      ['marci.zalec@hotmail.com'],
-            #####  )
-            #####  email.attach_alternative(html_content, "text/html")
-            #####  print(email.message())
-            #####  email.send(fail_silently=False)
-            connection.close()
+            email.attach_alternative(html_content, "text/html")
+            ## print(email.message())
+            email.send(fail_silently=False)
             return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -157,9 +146,6 @@ class VerifyTokenView(APIView):
     def post(self, request):
         sended_Token = request.data.get('token')
         user_token  = request.auth
-        
-        print(request)
-        print(f"Das ist der gesendete {sended_Token} und das der user {user_token} Token")
         
         if sended_Token == str(user_token):
             return Response(status=status.HTTP_200_OK)
