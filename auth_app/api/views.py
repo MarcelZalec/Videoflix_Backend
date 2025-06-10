@@ -96,7 +96,7 @@ class RequestPassowrdResetView(APIView):
                 subject,
                 text_content,
                 settings.DEFAULT_FROM_EMAIL,
-                ['marci.zalec@hotmail.com'],
+                [user.email],
             )
             email.attach_alternative(html_content, "text/html")
             ## print(email.message())

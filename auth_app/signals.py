@@ -39,7 +39,7 @@ def user_post_create(sender, instance, created, **kwargs):
             subject,
             text_content,
             settings.DEFAULT_FROM_EMAIL,
-            ['marci.zalec@hotmail.com'],
+            [instance.email],
         )
         msg.attach_alternative(html_content, "text/html")
         ## print(msg.message())
