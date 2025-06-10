@@ -77,7 +77,7 @@ class RequestPassowrdResetView(APIView):
             
             reset_url = reverse('reset_password_token', kwargs={'token': token})
             relative_reset_url = reset_url.replace('/api', 'api')
-            custom_port_url = f'{settings.REDIRECT_LANDING}{relative_reset_url}'
+            custom_port_url = f'{settings.REDIRECT_LANDING}resetPassword/{token}'
             full_url = custom_port_url
             domain_url = os.getenv('REDIRECT_RESTET_PASS')
             subject = "Reset your password"
