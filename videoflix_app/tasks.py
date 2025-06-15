@@ -56,7 +56,7 @@ def get_thumbnail(video_path):
         command = [
             'ffmpeg',
             '-i', video_path,  # Eingabevideo
-            '-ss', '0:00:01.000',  # Sprung zu der Anfangszeit (0 Sekunden)
+            '-ss', '0:00:01.000',  # Sprung zu der Anfangszeit (1 Sekunden)
             '-vframes', '1',  # Extrahiere nur ein Bild
             '-f', 'image2',  # Ausgabeformat (PNG)
             output_image_path  # Pfad für das Ausgabelbild
@@ -122,7 +122,7 @@ def convert_video_to_hls(v_path):
             print(f"Error: Failed to convert video to {res}")
 
 
-@shared_task
+# @shared_task
 def process_video(inst):
     """
     Job to convert a Video instance's video_file to HLS (HTTP Live Streaming)
@@ -141,10 +141,14 @@ def process_video(inst):
         return
     convert_video_to_hls(inst.video_file.path)
     
-    ## if not inst.thumbnail:
-    ##     thumbnail_path = get_thumbnail(inst.video_file.path)
-    ##     print(f"Das ist der path des Bildes {thumbnail_path}")
+    if not inst.thumbnail or inst.thumbnail == '':
+        thumbnail_path = get_thumbnail(inst.video_file.path)
     
     if inst.video_file:
-        # inst.thumbnail = thumbnail_path.replace(settings.MEDIA_ROOT, '')
+        if thumbnail_path:
+            inst.thumbnail = thumbnail_path.replace(settings.MEDIA_ROOT, '')
         inst.save()
+        if inst.video_file.path.endswith('.mp4'):
+            if os.path.isfile(inst.video_file.path):
+                os.remove(inst.video_file.path) # Remove the original video file after processing
+        

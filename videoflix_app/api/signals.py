@@ -15,14 +15,8 @@ logger = logging.getLogger(__name__)
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
     if created:
-        transaction.on_commit(lambda: process_video.delay_on_commit(instance))
-        ## ## transaction.on_commit(lambda: process_video.delay_on_commit(instance))
-        ## queue = get_queue('default', autocommit=True)
-        ## try:
-        ##     job = queue.enqueue(process_video, instance)
-        ##     logger.debug(f"Job successfully enqueued: {job.id}")
-        ## except Exception as e:
-        ##         logger.error(f"Error enqueuing job: {str(e)}")
+        transaction.on_commit(lambda: process_video(instance))
+        ## transaction.on_commit(lambda: process_video.delay_on_commit(instance))
 
 
 @receiver(post_delete, sender=Video)
@@ -32,11 +26,13 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     when corresponding 'Video' object is deleted
     """
     folder_path = os.path.dirname(instance.video_file.path)
+    clear_folder_path = os.path.splitext(instance.video_file.path)[0]
     if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)
-    # if instance.video_file:
-    #     if os.path.isfile(instance.video_file.path):
-    #         path = remove_mp4_from_string(instance.video_file.path)
-    #         
-    #         os.remove(path + '_720p.mp4')
-    #         os.remove(path + '_1080p.mp4')
+        resolution = ['240p', '360p', '480p', '720p', '1080p']
+        for res in resolution:
+            file_path = os.path.join(folder_path, f"{os.path.basename(clear_folder_path)}_{res}_hls")
+            if os.path.isdir(file_path):
+                try:
+                    shutil.rmtree(file_path)
+                except Exception as e:
+                    logger.error(f"Error removing file {file_path}: {e}")
