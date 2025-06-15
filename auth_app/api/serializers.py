@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth import authenticate
 from auth_app.models import CustomUserModel
 
 
@@ -23,3 +24,34 @@ class RegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('repeated_password')
         user = CustomUserModel.objects.create_user(**validated_data)
         return user
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    remember = serializers.BooleanField(required=False)
+    
+    def validate(self, data):
+        """
+        Validates the given data for a login request.
+
+        :param data: A dictionary of the given data
+        :return: The validated data with the user object added
+        :raises: serializers.ValidationError if the credentials are invalid
+        :raises: serializers.ValidationError if either email or password is empty
+        """
+        email = data.get('email')
+        password = data.get('password')
+        if email and password:
+            user = authenticate(username=email, password=password)
+            if not user:
+                raise serializers.ValidationError("Invalid login credentials")
+        else:
+            raise serializers.ValidationError("Both fields must be filled")
+
+        data['user'] = user
+        return data
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)

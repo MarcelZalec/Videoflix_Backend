@@ -1,17 +1,23 @@
 import os
+import shutil
 from videoflix_app.models import Video
-from auth_app.models import CustomUserModel
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 from videoflix_app.tasks import *
+from django_rq import job, get_queue
+from django.db import transaction
 
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
-    print("Video wurde geschpeichert")
     if created:
-        convert_480p(instance.video_file.path)
-    
+        transaction.on_commit(lambda: process_video(instance))
+        ## transaction.on_commit(lambda: process_video.delay_on_commit(instance))
+
 
 @receiver(post_delete, sender=Video)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
@@ -19,12 +25,14 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     Deletes file from filesystem
     when corresponding 'Video' object is deleted
     """
-    if instance.video_file:
-        if os.path.isfile(instance.video_file.path):
-            os.remove(instance.video_file.path)
-
-
-@receiver(post_save, sender=CustomUserModel)
-def user_post_create(sender, instance, created, **kwargs):
-    if instance is created:
-        pass
+    folder_path = os.path.dirname(instance.video_file.path)
+    clear_folder_path = os.path.splitext(instance.video_file.path)[0]
+    if os.path.exists(folder_path):
+        resolution = ['240p', '360p', '480p', '720p', '1080p']
+        for res in resolution:
+            file_path = os.path.join(folder_path, f"{os.path.basename(clear_folder_path)}_{res}_hls")
+            if os.path.isdir(file_path):
+                try:
+                    shutil.rmtree(file_path)
+                except Exception as e:
+                    logger.error(f"Error removing file {file_path}: {e}")

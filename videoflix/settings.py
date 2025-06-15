@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+import json
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,30 +23,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+THUMBNAIL_FOLDER = os.path.join(MEDIA_ROOT, 'thumbnails')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p_!skmgm6ri0fo75*yjcnxvy5rj&c5aw6i$0hcuiu*126+rp7&'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = json.loads(os.getenv('ALLOWED_HOSTS', '[]'))
 
-CACHE_TTL = 60 * 15
+CSRF_TRUSTED_ORIGINS = json.loads(os.getenv('CSRF_TRUSTED_ORIGINS', '[]'))
 
-CSRF_TRUSTED_ORIGINS = [
-  'http://127.0.0.1:5500',
-  'http://localhost:5500',
-  'https://test.marcelzalec.at',
-]
-
-CORS_ALLOWED_ORIGINS = [
-  'http://127.0.0.1:5500',
-  'http://localhost:5500',
-  'https://test.marcelzalec.at',
-]
+CORS_ALLOWED_ORIGINS = json.loads(os.getenv('CORS_ALLOWED_ORIGINS', '[]'))
 
 CORS_ALLOW_HEADERS = [
     'authorization',
@@ -64,7 +60,10 @@ INSTALLED_APPS = [
     'videoflix_app.apps.VideoflixAppConfig',
     'auth_app',
     'debug_toolbar',
+    "django_rq",
 ]
+
+AUTH_USER_MODEL = 'auth_app.CustomUserModel'
 
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
@@ -75,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 INTERNAL_IPS = [
@@ -83,10 +83,24 @@ INTERNAL_IPS = [
 
 ROOT_URLCONF = 'videoflix.urls'
 
+CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",  # django_redis.cache.RedisCache   ## redis_cache
+            "LOCATION": "redis://127.0.0.1:6379/1",
+            "OPTIONS": {
+                "PASSWORD": 'foobared',
+                "CLIENT_CLASS": "django_redis.client.DefaultClient"
+            },
+        "KEY_PREFIX": "videoflix"
+    }
+}
+
+CACHE_TTL = 60 * 15
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'auth_app/templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,17 +112,20 @@ TEMPLATES = [
     },
 ]
 
-CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.db.DatabaseCache",  #    .cache.RedisCache
-            "LOCATION": "redis://127.0.0.1:6379/1",
-            "OPTIONS": {
-                "PASSWORD": 'foobared',
-                "CLIENT_CLASS": "django_redis.client.DefaultClient"
-            },
-        "KEY_PREFIX": "videoflix"
-    }
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': 'foobared',
+        'DEFAULT_TIMEOUT': 36000,
+        ## 'REDIS_CLIENT_KWARGS': {    # Eventual additional Redis connection arguments
+        ##     'ssl_cert_reqs': None,
+        ## },
+    },
 }
+
+CELERY_BROKER_URL = 'redis://:foobared@127.0.0.1:6379/0'
 
 WSGI_APPLICATION = 'videoflix.wsgi.application'
 
@@ -122,6 +139,29 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+## DATABASES = {
+##     'default': {
+##         'ENGINE': 'django.db.backends.postgresql',
+##         'NAME': os.getenv('DB_NAME'),
+##         'USER': os.getenv('DB_USER'),
+##         'PASSWORD': os.getenv('DB_PASSWORD'),
+##         'HOST': os.getenv('DB_HOST', 'localhost'),
+##         'PORT': os.getenv('DB_PORT', '5432'),
+##     }
+## }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+DOMAIN_NAME = os.getenv('DOMAIN_NAME')
+FRONT_END = os.getenv('REDIRECT_LOGIN')
+REDIRECT_LANDING = os.getenv('REDIRECT_LANDING')
 
 
 # Password validation

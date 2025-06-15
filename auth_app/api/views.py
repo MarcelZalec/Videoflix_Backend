@@ -1,17 +1,31 @@
+from datetime import timedelta
+from django.core.mail import EmailMultiAlternatives, get_connection, send_mail
+from videoflix import settings
+from django.contrib.auth import get_user_model, tokens
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils import timezone, http
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from .serializers import *
+from auth_app.models import PasswordReset
+import os
+
+from django.core.mail import send_mail
+
+User = get_user_model()
 
 
-class LoginView(ObtainAuthToken):
+class LoginView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        serializer = self.serializer_class(data = request.data)
+        serializer = LoginSerializer(data = request.data)
         data = {}
         
         if serializer.is_valid():
@@ -19,13 +33,12 @@ class LoginView(ObtainAuthToken):
             token, created = Token.objects.get_or_create(user=user)
             data = {
                 'token': token.key,
-                'username': user.username,
+                'remember': user.remember,
                 'email': user.email
             }
+            return Response(data, status=status.HTTP_200_OK)
         else:
-            data = serializer.errors
-        
-        return Response(data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RegistrationView(APIView):
@@ -38,14 +51,103 @@ class RegistrationView(APIView):
         if serializer.is_valid():
             saved_account = serializer.save()
             token, created = Token.objects.get_or_create(user = saved_account)
-            print(f"Das ist der accsess Token {token}")
             data = {
                 'token': token.key,
                 'username': saved_account.username,
                 'email': saved_account.email
             }
+            return Response(data, status=status.HTTP_201_CREATED)
         else:
-            data = serializer.errors
-            return Response({'error': 'Etwas ist schiefgelaufen'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RequestPassowrdResetView(APIView):
+    permission_classes = [AllowAny]
+    TokenAuthentication = [AllowAny]
+    serializer_class = ResetPasswordSerializer
+    
+    def post(self, request):
+        email = request.data['email']
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            token_generator = PasswordResetTokenGenerator()
+            token = token_generator.make_token(user)
+            reset = PasswordReset(email=email, token=token)
+            reset.save()
+            
+            reset_url = reverse('reset_password_token', kwargs={'token': token})
+            relative_reset_url = reset_url.replace('/api', 'api')
+            custom_port_url = f'{settings.REDIRECT_LANDING}resetPassword/{token}'
+            full_url = custom_port_url
+            domain_url = os.getenv('REDIRECT_RESTET_PASS')
+            subject = "Reset your password"
+            text_content = render_to_string('emails/forgot_password.txt', {
+                'username': user.username, 
+                'full_url': full_url,
+                'domain_url': domain_url,
+            })
+            html_content = render_to_string('emails/forgot_password.html', {
+                'username': user.username, 
+                'full_url': full_url,
+                'domain_url': domain_url,
+            })
+            
+            email = EmailMultiAlternatives(
+                subject,
+                text_content,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+            )
+            email.attach_alternative(html_content, "text/html")
+            ## print(email.message())
+            email.send(fail_silently=False)
+            return Response({'success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ResetPasswordView(APIView):
+    permission_classes = []
+    
+    def get(self, request, token):
+        obj = PasswordReset.objects.filter(token=token).first()
+        if not obj:
+            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response(data, status=status.HTTP_201_CREATED)
+        token_lifetime = timedelta(hours=24)
+        if timezone.now() > obj.created_at + token_lifetime:
+            return Response({'error': 'Token expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'success': 'Token is valid'}, status=status.HTTP_200_OK)
+    
+    def post(self, request, token):
+        obj = PasswordReset.objects.filter(token=token).first()
+        if not obj:
+            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        token_lifetime = timedelta(hours=24)
+        if timezone.now() > obj.created_at + token_lifetime:
+            return Response({'error': 'Token expired'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = User.objects.filter(email=obj.email).first()
+        if user:
+            user.set_password(request.data['password'])
+            user.save()
+            obj.delete()
+            return Response({'success': 'Password updated'})
+        else:
+            return Response({'error': 'No user found'}, status=404)
+
+
+class VerifyTokenView(APIView):
+    authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        sended_Token = request.data.get('token')
+        user_token  = request.auth
+        
+        if sended_Token == str(user_token):
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
