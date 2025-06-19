@@ -8,7 +8,7 @@ The [Backend](https://github.com/MarcelZalec/Videoflix_Backend) was realized wit
 -----
 
 Start Frontend with
-<code>VS Code LiveServer<code>
+<code>VS Code LiveServer</code>
 
 1. <b>Clone the repository:</b><br>
    <code>git clone (https://github.com/MarcelZalec/Videoflix_Backend.git)</code><br>
@@ -23,11 +23,11 @@ Start Frontend with
    <code>pip install -r requirements.txt</code><br><br>
 
 4. <b>Make migrations<b><br>
-    <code>python manage.py makemigrations<code>
-    <code>python manage.py migrate<code>
+    <code>python manage.py makemigrations</code><br>
+    <code>python manage.py migrate</code><br>
 
 5. <b>Create a env file from .env_template<b><br>
-    <code>cp .env_template .env<code>
+    <code>cp .env_template .env</code><br>
 
 6. <b>Start Backend with<b><br>
-    <code>python3 manage.py runserver<code>
+    <code>python3 manage.py runserver</code>
