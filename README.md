@@ -24,10 +24,10 @@ Start Frontend with
 
 4. <b>Make migrations<b><br>
     <code>python manage.py makemigrations</code><br>
-    <code>python manage.py migrate</code><br>
+    <code>python manage.py migrate</code><br><br>
 
 5. <b>Create a env file from .env_template<b><br>
-    <code>cp .env_template .env</code><br>
+    <code>cp .env_template .env</code><br><br>
 
 6. <b>Start Backend with<b><br>
     <code>python3 manage.py runserver</code>
