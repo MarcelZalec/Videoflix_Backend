@@ -2,7 +2,7 @@
 ![Logo](Logo.svg)
 ## A Netflix Clone
 
-The [Frontend](https://github.com/MarcelZalec/videoflix_frontend) was realized with **Angular 19**,
+The [Frontend](https://github.com/MarcelZalec/videoflix_frontend) was realized with **Angular 19**,<br>
 The [Backend](https://github.com/MarcelZalec/Videoflix_Backend) was realized with **Django Rest Framework (DRF)**.
 
 -----
