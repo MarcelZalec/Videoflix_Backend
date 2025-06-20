@@ -25,6 +25,9 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        """
+        Authenticate the user and return an auth token if credentials are valid.
+        """
         serializer = LoginSerializer(data = request.data)
         data = {}
         
@@ -45,6 +48,9 @@ class RegistrationView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        """
+        Register a new user and return an auth token.
+        """
         serializer = RegistrationSerializer(data = request.data)
         data = {}
         
@@ -67,6 +73,9 @@ class RequestPassowrdResetView(APIView):
     serializer_class = ResetPasswordSerializer
     
     def post(self, request):
+        """
+        Generates a password reset token and sends a reset link via email.
+        """
         email = request.data['email']
         user = User.objects.filter(email__iexact=email).first()
         if user:
@@ -110,6 +119,9 @@ class ResetPasswordView(APIView):
     permission_classes = []
     
     def get(self, request, token):
+        """
+        Validates the reset token and checks expiration.
+        """
         obj = PasswordReset.objects.filter(token=token).first()
         if not obj:
             return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
@@ -121,6 +133,9 @@ class ResetPasswordView(APIView):
         return Response({'success': 'Token is valid'}, status=status.HTTP_200_OK)
     
     def post(self, request, token):
+        """
+        Updates the user's password if the token is valid.
+        """
         obj = PasswordReset.objects.filter(token=token).first()
         if not obj:
             return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
@@ -144,6 +159,9 @@ class VerifyTokenView(APIView):
     # permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        """
+        Confirms whether the provided token matches the authenticated user's token.
+        """
         sended_Token = request.data.get('token')
         user_token  = request.auth
         

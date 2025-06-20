@@ -11,6 +11,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
         fields = ['email','remember', 'provider', 'password', 'repeated_password']
 
     def validate(self, data):
+        """
+        Validate the input data before creating a user.
+
+        - Checks if the passwords match.
+        - Ensures the email is not already in use.
+        """
         if data['password'] != data['repeated_password']:
             raise serializers.ValidationError({'error': 'Passwords do not match!'})
         
@@ -21,6 +27,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return data
     
     def create(self, validated_data):
+        """
+        Remove the repeated password and create a new user.
+        
+        :param validated_data: Dictionary of validated input fields
+        :return: Newly created user instance
+        """
         validated_data.pop('repeated_password')
         user = CustomUserModel.objects.create_user(**validated_data)
         return user

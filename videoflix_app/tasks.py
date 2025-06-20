@@ -14,18 +14,33 @@ RESOLUTIONS = {
 
 
 def convert_240p(source):
+    """
+    Converts a video to 240p resolution using FFmpeg.
+
+    :param source: Path to the original video file
+    """
     target = remove_mp4_from_string(source) + '_240p.mp4'
     cmd = 'ffmpeg -i "{}" -s hd240 -c:v libx264 -crf 23 -c:a aac -strict -2 "{}"'.format(source, target)
     subprocess.run(cmd)
 
 
 def convert_480p(source):
+    """
+    Converts a video to 480p resolution using FFmpeg.
+
+    :param source: Path to the original video file
+    """
     target = remove_mp4_from_string(source) + '_480p.mp4'
     cmd = 'ffmpeg -i "{}" -s hd480 -c:v libx264 -crf 23 -c:a aac -strict -2 "{}"'.format(source, target)
     subprocess.run(cmd)
 
 
 def convert_720p(source):
+    """
+    Converts a video to 720p resolution using FFmpeg.
+
+    :param source: Path to the original video file
+    """
     target = remove_mp4_from_string(source) + '_720p.mp4'
     cmd = 'ffmpeg -i "{}" -s hd720 -c:v libx264 -crf 23 -c:a aac -strict -2 "{}"'.format(source, target)
     subprocess.run(cmd)
@@ -35,17 +50,34 @@ def convert_720p(source):
 
 
 def convert_1080p(source):
+    """
+    Converts a video to 1080p resolution using FFmpeg.
+
+    :param source: Path to the original video file
+    """
     target = remove_mp4_from_string(source) + '_1080p.mp4'
     cmd = 'ffmpeg -i "{}" -s hd1080 -c:v libx264 -crf 23 -c:a aac -strict -2 "{}"'.format(source, target)
     subprocess.run(cmd)
 
 
 def remove_mp4_from_string(s):
+    """
+    Removes the .mp4 file extension from the input string.
+
+    :param s: Filename as a string
+    :return: Filename without .mp4 extension
+    """
     s:str = s
     return s.replace('.mp4', '')
 
 
 def get_thumbnail(video_path):
+    """
+    Extracts a thumbnail image from a video using FFmpeg.
+
+    :param video_path: Path to the source video file
+    :return: Result of the subprocess call (or None if failed)
+    """
     thumbnail_name = os.path.basename(video_path).replace('.mp4', '.png')
     output_image_path = os.path.join(settings.THUMBNAIL_FOLDER, thumbnail_name)
     
@@ -133,6 +165,8 @@ def process_video(inst):
 
     The converted video is saved in separate folders with the same name as the
     original video but with the appended resolution (e.g. "video_240p_hls").
+    
+    - Deletes the original video file after processing
 
     :param instance: An instance of the Video model
     :return: None

@@ -14,6 +14,10 @@ from django.core.mail import get_connection
 
 @receiver(post_save, sender=CustomUserModel)
 def user_post_create(sender, instance, created, **kwargs):
+    """
+    Triggered after a new user is created.
+    If the user is newly created and inactive, an email with an activation link is sent.
+    """
     pass
     if created and not instance.is_active:
         tg = PRTG()
@@ -21,7 +25,7 @@ def user_post_create(sender, instance, created, **kwargs):
         uid = urlsafe_base64_encode(force_bytes(instance.pk))
         activation_url = reverse('activate_user', kwargs={'uidb64': uid, 'token': token})
         relative_activation_url = activation_url.replace('/api', 'api')
-        full_url = f'http://127.0.0.1:8000/{relative_activation_url}'
+        full_url = f'{settings.BACKEND_URL}{relative_activation_url}'
         domain_url = settings.REDIRECT_LANDING
         print(full_url)
         text_content = render_to_string(
