@@ -31,4 +31,4 @@ def activate_user(request, uidb64, token):
         return redirect(f"{REDIRECT_LANDING}login/")
     else:
         messages.error(request, 'The activation link is invalid!')
-        return redirect(f"{REDIRECT_LANDING}login/")
+        return redirect(f"{REDIRECT_LANDING}")
