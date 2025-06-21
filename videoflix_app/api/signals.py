@@ -14,16 +14,21 @@ logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=Video)
 def video_post_save(sender, instance, created, **kwargs):
+    """
+    Processes the video after it has been created.
+    Runs inside a database transaction to ensure consistency.
+    """
     if created:
         transaction.on_commit(lambda: process_video(instance))
+        # Optionally, for Celery-based async:
         ## transaction.on_commit(lambda: process_video.delay_on_commit(instance))
 
 
 @receiver(post_delete, sender=Video)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
-    Deletes file from filesystem
-    when corresponding 'Video' object is deleted
+    Deletes all resolution-specific directories associated with the video file
+    when the corresponding Video object is deleted from the database.
     """
     folder_path = os.path.dirname(instance.video_file.path)
     clear_folder_path = os.path.splitext(instance.video_file.path)[0]

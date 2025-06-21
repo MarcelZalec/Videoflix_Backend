@@ -162,6 +162,7 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 DOMAIN_NAME = os.getenv('DOMAIN_NAME')
 FRONT_END = os.getenv('REDIRECT_LOGIN')
 REDIRECT_LANDING = os.getenv('REDIRECT_LANDING')
+BACKEND_URL = os.getenv('BACKEND_URL')
 
 
 # Password validation

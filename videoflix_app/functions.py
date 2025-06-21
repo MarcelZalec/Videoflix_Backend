@@ -6,6 +6,15 @@ from auth_app.models import CustomUserModel
 import os
 
 def activate_user(request, uidb64, token):
+    """
+    Handles account activation via a token and UID encoded in base64.
+
+    - Decodes the user ID
+    - Retrieves the user from the database
+    - Validates the token
+    - Activates the user if not already active
+    - Redirects based on outcome
+    """
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
         user = CustomUserModel.objects.get(pk=uid)

@@ -8,7 +8,11 @@ class CustomUserViewAdmin(admin.ModelAdmin):
     list_display=["username", "email", "is_active", "is_staff"]
     
     def get_readonly_fields(self, request, obj):
-        """ Setzt `password` als readonly nur beim Bearbeiten und `is_staff`, wenn der Benutzer keine Berechtigung hat """
+        """
+        Set fields as read-only conditionally:
+        - 'password' becomes read-only in edit view
+        - 'is_staff' becomes read-only if user lacks permission to change user
+        """
         readonly_fields = []
 
         if obj:  # Falls ein Objekt existiert, ist es die Bearbeitungsansicht -> `password` ist readonly
@@ -20,6 +24,11 @@ class CustomUserViewAdmin(admin.ModelAdmin):
         return readonly_fields
     
     def get_fieldsets(self, request, obj):
+        """
+        Define the layout of fields for add and edit views.
+
+        Returns a custom fieldset depending on whether the object exists.
+        """
         if obj:  # Wenn ein Objekt existiert, handelt es sich um eine Bearbeitungsansicht
             return [
                 (
