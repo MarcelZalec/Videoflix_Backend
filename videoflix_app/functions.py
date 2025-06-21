@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator as tg
 from django.utils.http import urlsafe_base64_decode
 from auth_app.models import CustomUserModel
+from videoflix.settings import REDIRECT_LANDING
 import os
 
 def activate_user(request, uidb64, token):
@@ -27,7 +28,7 @@ def activate_user(request, uidb64, token):
             messages.success(request, 'Your account has been activated.')
         else:
             messages.info(request, 'Your account is already activated.')
-        return redirect(os.getenv('REDIRECT_LOGIN'))
+        return redirect(f"{REDIRECT_LANDING}login/")
     else:
         messages.error(request, 'The activation link is invalid!')
-        return redirect(os.getenv('REDIRECT_LANDING'))
+        return redirect(f"{REDIRECT_LANDING}")
