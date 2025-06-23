@@ -59,14 +59,14 @@ INSTALLED_APPS = [
     'django_filters',
     'videoflix_app.apps.VideoflixAppConfig',
     'auth_app',
-    'debug_toolbar',
+#    'debug_toolbar',
     "django_rq",
 ]
 
 AUTH_USER_MODEL = 'auth_app.CustomUserModel'
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -86,9 +86,9 @@ ROOT_URLCONF = 'videoflix.urls'
 CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",  # django_redis.cache.RedisCache   ## redis_cache
-            "LOCATION": "redis://127.0.0.1:6379/1",
+            "LOCATION": os.getenv('REDIS_URL', "redis://127.0.0.1:6379/1"),
             "OPTIONS": {
-                "PASSWORD": 'foobared',
+                "PASSWORD": os.getenv('REDIS_PASSWORD'),
                 "CLIENT_CLASS": "django_redis.client.DefaultClient"
             },
         "KEY_PREFIX": "videoflix"
@@ -114,10 +114,10 @@ TEMPLATES = [
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
+        'HOST': os.getenv('RQ_HOST', 'localhost'),
+        'PORT': os.getenv('RQ_PORT', 6379),
         'DB': 0,
-        'PASSWORD': 'foobared',
+        'PASSWORD': os.getenv('RQ_PASSWORD', ''),
         'DEFAULT_TIMEOUT': 36000,
         ## 'REDIS_CLIENT_KWARGS': {    # Eventual additional Redis connection arguments
         ##     'ssl_cert_reqs': None,
@@ -125,7 +125,7 @@ RQ_QUEUES = {
     },
 }
 
-CELERY_BROKER_URL = 'redis://:foobared@127.0.0.1:6379/0'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 
 WSGI_APPLICATION = 'videoflix.wsgi.application'
 
