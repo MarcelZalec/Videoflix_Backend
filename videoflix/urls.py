@@ -18,14 +18,15 @@ from django.contrib import admin
 from django.urls import path, include
 from videoflix import settings
 from django.conf.urls.static import static
-from debug_toolbar.toolbar import debug_toolbar_urls
+## from debug_toolbar.toolbar import debug_toolbar_urls
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('videoflix_app.api.urls')),
     path('auth/', include('auth_app.api.urls')),
     path('django-rq/', include('django_rq.urls')),
-]
+] + staticfiles_urlpatterns()
 
-urlpatterns += debug_toolbar_urls()
+## urlpatterns += debug_toolbar_urls()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
