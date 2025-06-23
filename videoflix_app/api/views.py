@@ -2,6 +2,7 @@ import os
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from django.core.cache import cache
 from django.http import JsonResponse, FileResponse
 from django.shortcuts import get_object_or_404
@@ -15,10 +16,10 @@ from rest_framework.permissions import AllowAny
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-# @cache_page(CACHE_TTL)
 class VideoView(APIView):
     permission_classes = [AllowAny]
     
+    @method_decorator(cache_page(CACHE_TTL))
     def get(self, request, format=None):
         """
         Retrieve all videos from cache or database.
@@ -51,10 +52,10 @@ class VideoView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# @cache_page(CACHE_TTL)
 class SingleVideoView(APIView):
     permission_classes = [AllowAny]
     
+    @method_decorator(cache_page(CACHE_TTL))
     def get(self, request, video_id):
         """
         Retrieve a single video by its ID.
