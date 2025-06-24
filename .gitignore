@@ -13,3 +13,5 @@ db.sqlite3
 !**/migrations/__init__.py
 
 up.bat
+videoflix/keyfile.py
+videoflix/local_settings.py

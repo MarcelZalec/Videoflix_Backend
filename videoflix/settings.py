@@ -59,14 +59,12 @@ INSTALLED_APPS = [
     'django_filters',
     'videoflix_app.apps.VideoflixAppConfig',
     'auth_app',
-#    'debug_toolbar',
     "django_rq",
 ]
 
 AUTH_USER_MODEL = 'auth_app.CustomUserModel'
 
 MIDDLEWARE = [
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -85,10 +83,10 @@ ROOT_URLCONF = 'videoflix.urls'
 
 CACHES = {
         "default": {
-            "BACKEND": "django_redis.cache.RedisCache",  # django_redis.cache.RedisCache   ## redis_cache
-            "LOCATION": os.getenv('REDIS_URL', "redis://127.0.0.1:6379/1"),
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv('REDIS_URL', ''),
             "OPTIONS": {
-                "PASSWORD": os.getenv('REDIS_PASSWORD'),
+                "PASSWORD": os.getenv('REDIS_PASSWORD', ''),
                 "CLIENT_CLASS": "django_redis.client.DefaultClient"
             },
         "KEY_PREFIX": "videoflix"
@@ -119,9 +117,6 @@ RQ_QUEUES = {
         'DB': 0,
         'PASSWORD': os.getenv('RQ_PASSWORD', ''),
         'DEFAULT_TIMEOUT': 36000,
-        ## 'REDIS_CLIENT_KWARGS': {    # Eventual additional Redis connection arguments
-        ##     'ssl_cert_reqs': None,
-        ## },
     },
 }
 
@@ -136,31 +131,23 @@ WSGI_APPLICATION = 'videoflix.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', ''),
+        'USER': os.getenv('DB_USER', ''),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
-## DATABASES = {
-##     'default': {
-##         'ENGINE': 'django.db.backends.postgresql',
-##         'NAME': os.getenv('DB_NAME'),
-##         'USER': os.getenv('DB_USER'),
-##         'PASSWORD': os.getenv('DB_PASSWORD'),
-##         'HOST': os.getenv('DB_HOST', 'localhost'),
-##         'PORT': os.getenv('DB_PORT', '5432'),
-##     }
-## }
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_PORT = os.getenv('EMAIL_PORT')
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
-DOMAIN_NAME = os.getenv('DOMAIN_NAME')
+EMAIL_HOST = os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = os.getenv('EMAIL_PORT', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', True)
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', '')
 REDIRECT_LANDING = os.getenv('FRONTEND_BASE_URL')
 BACKEND_URL = os.getenv('BACKEND_URL')
 
