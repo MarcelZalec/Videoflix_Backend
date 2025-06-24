@@ -1,9 +1,10 @@
 import os
 from celery import Celery
+from videoflix.settings_loader import settings_module
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault(
-    "DJANGO_SETTINGS_MODULE", 'videoflix.settings'
+    "DJANGO_SETTINGS_MODULE", settings_module()
 )
 
 app = Celery('videoflix')

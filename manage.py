@@ -2,11 +2,12 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from videoflix.settings_loader import settings_module
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'videoflix.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module())
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
