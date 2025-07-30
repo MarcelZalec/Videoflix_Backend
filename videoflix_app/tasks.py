@@ -99,7 +99,7 @@ def get_thumbnail(video_path):
 
         print("Erstes Bild erfolgreich extrahiert.")
         
-        return result
+        return output_image_path
 
     except subprocess.CalledProcessError as e:
         print(f"Fehler beim Extrahieren des Bildes: {e}")
@@ -180,7 +180,7 @@ def process_video(inst):
     
     if inst.video_file:
         if thumbnail_path:
-            inst.thumbnail = thumbnail_path.replace(settings.MEDIA_ROOT, '')
+            inst.thumbnail = str(thumbnail_path).replace(str(settings.MEDIA_ROOT), '')
         inst.save()
         if inst.video_file.path.endswith('.mp4'):
             if os.path.isfile(inst.video_file.path):
