@@ -9,6 +9,16 @@ class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUserModel
         fields = ['email','remember', 'provider', 'password', 'repeated_password']
+    
+    
+    def getUsernameFromEmail(self, email):
+        if email:
+            username = email.split('@')[0]
+            if '.' in username:
+                return username.split('.')[0]
+            else:
+                return username
+
 
     def validate(self, data):
         """
@@ -23,7 +33,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
         if CustomUserModel.objects.filter(email=data['email']).exists():
             raise serializers.ValidationError(
                 {'error': 'This email is already in use!'})
-            
+        
+        data["username"] = self.getUsernameFromEmail(data['email'])
         return data
     
     def create(self, validated_data):
