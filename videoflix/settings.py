@@ -20,8 +20,8 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 THUMBNAIL_FOLDER = os.path.join(MEDIA_ROOT, 'thumbnails')
 
@@ -85,7 +85,7 @@ ROOT_URLCONF = 'videoflix.urls'
 CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": os.getenv('REDIS_URL', ''),
+            "LOCATION": os.environ.get("REDIS_LOCATION", default="redis://redis:6379/1"),
             "OPTIONS": {
                 "PASSWORD": os.getenv('REDIS_PASSWORD', ''),
                 "CLIENT_CLASS": "django_redis.client.DefaultClient"
@@ -113,16 +113,19 @@ TEMPLATES = [
 
 RQ_QUEUES = {
     'default': {
-        'HOST': os.getenv('RQ_HOST', 'localhost'),
-        'PORT': os.getenv('RQ_PORT', 6379),
-        'DB': 0,
+        'HOST': os.environ.get("REDIS_HOST", default="redis"),
+        'PORT': os.environ.get("REDIS_PORT", default=6379),
+        'DB': os.environ.get("REDIS_DB", default=0),
         'PASSWORD': os.getenv('RQ_PASSWORD', ''),
-        'DEFAULT_TIMEOUT': 36000,
+        'DEFAULT_TIMEOUT': 900,
     },
 }
 
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+
+CACHE_TTL = 60 * 15
+
+## CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+## CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 
 WSGI_APPLICATION = 'videoflix.wsgi.application'
 
@@ -189,6 +192,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
