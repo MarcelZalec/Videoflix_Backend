@@ -19,7 +19,8 @@ def video_post_save(sender, instance, created, **kwargs):
     Runs inside a database transaction to ensure consistency.
     """
     if created:
-        transaction.on_commit(lambda: process_video(instance))
+        queue = get_queue('default', autocommit=True)
+        queue.enqueue(process_video, instance)
         # Optionally, for Celery-based async:
         ## transaction.on_commit(lambda: process_video.delay_on_commit(instance))
 
@@ -32,6 +33,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     """
     folder_path = os.path.dirname(instance.video_file.path)
     clear_folder_path = os.path.splitext(instance.video_file.path)[0]
+    thumbnail = instance.thumbnail
     if os.path.exists(folder_path):
         resolution = ['240p', '360p', '480p', '720p', '1080p']
         for res in resolution:
@@ -41,3 +43,9 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
                     shutil.rmtree(file_path)
                 except Exception as e:
                     logger.error(f"Error removing file {file_path}: {e}")
+
+    if thumbnail and hasattr(thumbnail, 'path'):
+        try:
+            os.remove(thumbnail.path)
+        except FileNotFoundError:
+            pass
