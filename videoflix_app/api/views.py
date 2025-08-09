@@ -11,13 +11,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializer import *
 from videoflix_app.models import Video
-from rest_framework.permissions import AllowAny
+from auth_app.api.permissions import VideoPermissons
+from rest_framework.authentication import TokenAuthentication
 
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 class VideoView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [VideoPermissons]
+    authentication_classes = [TokenAuthentication]
     
     @method_decorator(cache_page(CACHE_TTL))
     def get(self, request, format=None):
@@ -53,7 +55,8 @@ class VideoView(APIView):
 
 
 class SingleVideoView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [VideoPermissons]
+    authentication_classes = [TokenAuthentication]
     
     @method_decorator(cache_page(CACHE_TTL))
     def get(self, request, video_id):

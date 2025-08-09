@@ -4,11 +4,20 @@ from videoflix_app.models import Video
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 from videoflix_app.tasks import *
-from django_rq import job, get_queue
+from django_rq import get_queue
 from django.db import transaction
 
 import logging
 
+log_path = os.path.join(os.path.dirname(__file__), 'worker.log')
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='[%(asctime)s] [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler(log_path),
+    ]
+)
 
 logger = logging.getLogger(__name__)
 
@@ -18,11 +27,17 @@ def video_post_save(sender, instance, created, **kwargs):
     Processes the video after it has been created.
     Runs inside a database transaction to ensure consistency.
     """
+    ## logger.info("es läuft bis hierher")
     if created:
-        queue = get_queue('default', autocommit=True)
-        queue.enqueue(process_video, instance)
-        # Optionally, for Celery-based async:
-        ## transaction.on_commit(lambda: process_video.delay_on_commit(instance))
+        try:
+            logger.info(f"Wurde erstellt {instance.id}")
+            queue = get_queue('default', autocommit=True)
+            queue.enqueue(process_video, instance)
+            logger.info(f"New video created with ID {instance.id}.")
+            # Optionally, for Celery-based async:
+            ## transaction.on_commit(lambda: process_video.delay_on_commit(instance))
+        except Exception as e:
+            logger.error(f"Error while enqueuing video {instance.id}: {str(e)}", exc_info=True)
 
 
 @receiver(post_delete, sender=Video)
