@@ -15,3 +15,5 @@ db.sqlite3
 up.bat
 videoflix/keyfile.py
 videoflix/local_settings.py
+
+videoflix_app/api/worker.log
