@@ -4,7 +4,7 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.core.cache import cache
-from django.http import JsonResponse, FileResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -99,3 +99,12 @@ class SingleVideoView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def server_staus(request):
+    """
+    Returns status Code to control server status
+    
+    :return: HTTP 200
+    """
+    return HttpResponse(status=status.HTTP_200_OK)
